@@ -646,16 +646,49 @@ Verify your biometrics to save changes.."""
 def handle_profile_edit_request(text: str) -> Dict[str, Any]:
     """Handle user's profile edit request with biometric verification."""
     user_input = text.lower().strip()
-    
-    # Check if user is providing change details and biometrics
-    if 'email' in user_input and 'biometrics' in user_input:
-        conversation_states["current_state"] = "awaiting_biometrics"
+    # Normalize ' at ' or 'at' in email context to '@'
+    normalized_text = re.sub(r'(\b[\w\.-]+)\s+at\s+([\w\.-]+\b)', r'\1@\2', text)
+    normalized_text = re.sub(r'(\b[\w\.-]+)at([\w\.-]+\b)', r'\1@\2', normalized_text)
+    # Simple email extraction
+    email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', normalized_text)
+    has_email = 'email' in user_input and email_match
+    # Simple phone extraction (accepts +, digits, spaces, dashes, parentheses)
+    phone_match = re.search(r'(?:\+?\d[\d\s\-\(\)]{7,}\d)', normalized_text)
+    has_phone = 'phone' in user_input and phone_match
+    has_biometrics = 'biometric' in user_input or 'biometrics' in user_input
+
+    if has_email:
+        new_email = email_match.group()
+        conversation_states["new_email"] = new_email
         conversation_states["pending_changes"] = text
-        
-        return {
-            "response": "Verifying your biometrics...",
-            "data": {"state": "awaiting_biometrics", "changes": text}
-        }
+        if has_biometrics:
+            conversation_states["current_state"] = "awaiting_biometrics"
+            return {
+                "response": f"Verifying your biometrics for email change to {new_email}...",
+                "data": {"state": "awaiting_biometrics", "changes": text, "new_email": new_email}
+            }
+        else:
+            conversation_states["current_state"] = "awaiting_biometrics"
+            return {
+                "response": f"You want to change your email to {new_email}. Please provide your biometrics to confirm.",
+                "data": {"state": "awaiting_biometrics", "changes": text, "new_email": new_email}
+            }
+    elif has_phone:
+        new_phone = phone_match.group()
+        conversation_states["new_phone"] = new_phone
+        conversation_states["pending_changes"] = text
+        if has_biometrics:
+            conversation_states["current_state"] = "awaiting_biometrics"
+            return {
+                "response": f"Verifying your biometrics for phone number change to {new_phone}...",
+                "data": {"state": "awaiting_biometrics", "changes": text, "new_phone": new_phone}
+            }
+        else:
+            conversation_states["current_state"] = "awaiting_biometrics"
+            return {
+                "response": f"You want to change your phone number to {new_phone}. Please provide your biometrics to confirm.",
+                "data": {"state": "awaiting_biometrics", "changes": text, "new_phone": new_phone}
+            }
     elif any(phrase in user_input for phrase in ['email', 'phone', 'name', 'password']):
         return {
             "response": "Please provide the change details and verify your biometrics to save changes.",
@@ -669,33 +702,32 @@ def handle_profile_edit_request(text: str) -> Dict[str, Any]:
 
 def handle_biometric_verification(text: str) -> Dict[str, Any]:
     """Handle biometric verification and profile update."""
-    # Extract email change from pending changes
-    pending_changes = conversation_states.get("pending_changes", "")
-    
-    # Simple email extraction (in real app, this would be more robust)
-    import re
-    email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', pending_changes)
-    
-    if email_match:
-        new_email = email_match.group()
-        # Update user profile (in real app, this would update database)
+    # Check for email or phone update
+    new_email = conversation_states.get("new_email")
+    new_phone = conversation_states.get("new_phone")
+    if new_email:
         user_profile['email'] = new_email
-        
-        # Clear state and return to intro after successful update
         conversation_states["current_state"] = "intro"
         conversation_states.pop("pending_changes", None)
-        
-        response = f"""Your email address has been successfully changed to {new_email}.. please check your email inbox and verify...
-
-Returning to main menu..."""
-        
+        conversation_states.pop("new_email", None)
+        response = f"Your email address has been successfully changed to {new_email}. Please check your email inbox and verify.\n\nReturning to main menu..."
+        return {
+            "response": response,
+            "data": {"state": "profile_updated", "updated_profile": user_profile}
+        }
+    elif new_phone:
+        user_profile['phone'] = new_phone
+        conversation_states["current_state"] = "intro"
+        conversation_states.pop("pending_changes", None)
+        conversation_states.pop("new_phone", None)
+        response = f"Your phone number has been successfully changed to {new_phone}.\n\nReturning to main menu..."
         return {
             "response": response,
             "data": {"state": "profile_updated", "updated_profile": user_profile}
         }
     else:
         return {
-            "response": "I couldn't process the email change. Please try again with your new email address and biometric verification.",
+            "response": "I couldn't process the change. Please try again with your new email or phone number and biometric verification.",
             "data": {"state": "profile_edit"}
         }
 
