@@ -24,7 +24,7 @@ const VoiceAssistant = () => {
   
   // Route data storage for navigation
   const [routeData, setRouteData] = useState(null);
-  const [currentInstruction, setCurrentInstruction] = useState('');
+  // const [currentInstruction, setCurrentInstruction] = useState(''); // Removed unused variable
   
   // Refs for speech APIs
   const recognitionRef = useRef(null);
@@ -126,7 +126,8 @@ const VoiceAssistant = () => {
         clearTimeout(fallbackTimer);
       }
     };
-  }, []);  // Remove conversationState dependency to prevent loop
+  // Add all required dependencies to fix ESLint error
+  }, [conversationState, handleUserSpeech, initializeSaraConversation, isSpeaking, lastResponse, routeData, speakResponse]);
 
   /**
    * Initialize Sara conversation with introduction
@@ -390,14 +391,7 @@ const VoiceAssistant = () => {
   /**
    * Get appropriate button color based on state
    */
-  const getButtonClass = () => {
-    let classes = 'speak-button';
-    if (isListening) classes += ' listening';
-    if (isProcessing) classes += ' processing';
-    if (isSpeaking) classes += ' speaking';
-    if (conversationState === 'GUIDING') classes += ' guiding';
-    return classes;
-  };
+  // Removed unused getButtonClass function
 
   /**
    * Handle close button - stop speech and exit blind mode
