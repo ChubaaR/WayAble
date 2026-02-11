@@ -386,11 +386,6 @@ const VoiceAssistant = () => {
   };
 
   /**
-   * Get appropriate button color based on state
-   */
-  // Removed unused getButtonClass function
-
-  /**
    * Handle close button - stop speech and exit blind mode
    */
   const handleCloseAndExit = () => {
