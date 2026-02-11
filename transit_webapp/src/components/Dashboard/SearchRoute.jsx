@@ -116,7 +116,7 @@ const SearchRoute = () => {
         // setIsSearching(true); // Removed unused state setter
         try {
             console.log('Searching for:', query);
-            const response = await fetch(`http://localhost:8000/api/maps/geocode?q=${encodeURIComponent(query)}&limit=5`);
+            const response = await fetch(`https://wayable-backend.onrender.com/api/maps/geocode?q=${encodeURIComponent(query)}&limit=5`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);

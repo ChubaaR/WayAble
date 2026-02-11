@@ -180,7 +180,7 @@ const VoiceAssistant = () => {
     console.log('📤 Sending to backend:', text);
     try {
       // Updated endpoint URL - the assistant router is mounted without /api prefix
-      const response = await fetch('http://localhost:8000/query', {
+      const response = await fetch('https://wayable-backend.onrender.com/query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text }),
@@ -232,7 +232,7 @@ const VoiceAssistant = () => {
       let errorMsg = "Sorry, I'm having trouble connecting to the navigation service.";
       
       if (error.message.includes('fetch')) {
-        errorMsg += " Please make sure the backend server is running on http://localhost:8000";
+        errorMsg += " Please make sure the backend server is running on https://wayable-backend.onrender.com";
       } else if (error.message.includes('status: 500')) {
         errorMsg += " The server encountered an error processing your request.";
       } else if (error.message.includes('status: 404')) {

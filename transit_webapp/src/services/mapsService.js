@@ -1,5 +1,5 @@
 // Frontend service to connect to OSRM backend
-const API_BASE = 'http://localhost:8000'; // Adjust to your backend URL
+const API_BASE = 'https://wayable-backend.onrender.com'; // Production backend URL
 
 export const mapsService = {
   // Geocode a location using Nominatim via your backend
