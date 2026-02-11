@@ -198,7 +198,6 @@ const VoiceAssistant = () => {
       if (data.response) {
         console.log('✅ Setting Sara response:', data.response);
         setLastResponse(data.response);
-        setCurrentInstruction(data.response);
         speakResponse(data.response);
       } else {
         console.warn('⚠️ No response field in backend data');
@@ -330,7 +329,6 @@ const VoiceAssistant = () => {
           // Wait a moment before resetting to let the user process
           setTimeout(() => {
             setLastResponse('');
-            setCurrentInstruction('');
             // Trigger Sara's initial greeting again
             setTimeout(() => {
               initializeSaraConversation();
@@ -349,7 +347,6 @@ const VoiceAssistant = () => {
           setIsCompletingJourney(false);
           setTimeout(() => {
             setLastResponse('');
-            setCurrentInstruction('');
             setTimeout(() => {
               initializeSaraConversation();
             }, 1000);
